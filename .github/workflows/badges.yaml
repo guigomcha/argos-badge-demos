@@ -1,0 +1,32 @@
+name: Main pipeline
+
+permissions:
+  packages: write
+  contents: write
+  issues: write
+  pull-requests: write
+
+run-name: ${{ github.event.commits[0].message }}
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    tags:
+      - "*"
+  pull_request:
+
+
+jobs:
+  run-badges:
+    uses: ./.github/workflows/badge-generator.yaml
+    with:
+      ref-name: pythonImage
+      coverage: "45.2"
+      flake8-issues: "2"
+      mypy-score: "95.2"

@@ -1,0 +1,116 @@
+name: Badges generation
+description: |
+    This workflow creates custom badges that can be use in the README.md (Sonarqube also provides badges that can be used).
+    It will only push badges for the latest push to main and for tags. It uses the repository's wiki (requires to create an empty page).
+      + For tags (overwritten)
+        ![Not found](https://github.com/BullSequana/REPLACE_WITH_YOUR_REPOSITORY/wiki/REPLACE_WITH_REF_NAME-coverage-latesttag.svg)
+        ![Not found](https://github.com/BullSequana/REPLACE_WITH_YOUR_REPOSITORY/wiki/REPLACE_WITH_REF_NAME-flake8-latesttag.svg)
+        ![Not found](https://github.com/BullSequana/REPLACE_WITH_YOUR_REPOSITORY/wiki/REPLACE_WITH_REF_NAME-mypy-latesttag.svg)
+        ![Not found](https://github.com/BullSequana/REPLACE_WITH_YOUR_REPOSITORY/wiki/REPLACE_WITH_REF_NAME-version-latesttag.svg)
+      + For main branch. To show progress respect to last version.
+        ![Not found](https://github.com/BullSequana/REPLACE_WITH_YOUR_REPOSITORY/wiki/REPLACE_WITH_REF_NAME-coverage-main.svg)
+        ![Not found](https://github.com/BullSequana/REPLACE_WITH_YOUR_REPOSITORY/wiki/REPLACE_WITH_REF_NAME-flake8-main.svg)
+        ![Not found](https://github.com/BullSequana/REPLACE_WITH_YOUR_REPOSITORY/wiki/REPLACE_WITH_REF_NAME-mypy-main.svg)
+
+
+on:
+  workflow_call:
+    inputs:
+      ref-name:
+        type: string
+        required: true
+        description: 'Ref name that will be used to generate the badges'
+      coverage:
+        type: string 
+        required: true
+        description: 'Test coverage value'   
+        default: disabled
+      # Flake8 does not provide an scoring system. We just show how many issues found
+      flake8-issues:
+        type: string
+        description: 'Flake8 issues returned'
+        default: disabled
+      mypy-score:
+        type: string
+        description: 'Mypy score returned (100 - inconsitencies_score)'
+        default: disabled
+    # TODO: Get a argos-wide credentials or GH equivalent
+    secrets:
+      gh-pat:
+        description: 'Required to push badged to wiki ( use {{ secrets.GH_PAT }})'
+        required: true
+      gh-user:
+        description: 'Required to push badged to wiki ( use {{ secrets.GH_USER }})'
+        required: true
+      gh-email:
+        description: 'Required to push badged to wiki ( use {{ secrets.GH_EMAIL }})'
+        required: true
+
+
+# Cancel in-progress runs when a new workflow with the same group name is triggered
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref_name }}-${{ inputs.ref-name }}
+  cancel-in-progress: true
+
+jobs:
+  publish_reports_badges:
+    name: ${{ inputs.ref-name }}-Push badges
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create badges for enabled-inputs
+        shell: bash
+        run: |
+          # Badges are not created for PRs 
+          if [[ ${{ github.ref }} != 'refs/tags/'* && ${{ github.ref_name }} != 'main' ]]; then
+            echo "not valid github reference ${{ github.ref }}"
+            exit 0
+          fi
+          mkdir badges
+          BRANCH=main
+          echo ${{ github.ref }}
+          if [[ ${{ github.ref }} == 'refs/tags/'* ]]; then
+            BRANCH=latesttag
+            echo "Creating badges for tag"
+            VERSION="${{ github.ref##refs/tags/ }}"
+            COLORV=blue
+            echo "Version: $VERSION"
+            curl -s https://img.shields.io/badge/version-${VERSION}-$COLORV > badges/${{ inputs.ref-name }}-version-${BRANCH}.svg
+          fi
+          
+          # Coverage badge. Sonarqube only provides the latest, we want to remember what the latest tag scored.
+          if [[ ${{ inputs.coverage }} != "disabled" ]]; then
+            COLORC=$(awk -v f="$COVERAGE" 'BEGIN{print (f<30)?"red":(f>=30&&f<=70)?"yellow":"darkgreen"}')
+            curl -s https://img.shields.io/badge/coverage-${COVERAGE}%25-${COLORC} > badges/${{ inputs.ref-name }}-coverage-${BRANCH}.svg
+          fi
+
+          # Mypy score
+          if [[ ${{ inputs.mypy-score }} != "disabled" ]]; then
+            QA=${{ inputs.mypy-score  }}
+            COLORQA=$(awk -v f="$QA" 'BEGIN{print (f<3)?"red":(f>=3&&f<=7)?"yellow":"darkgreen"}')
+            curl -s https://img.shields.io/badge/pylint-$QA-$COLORQA > badges/${{ inputs.ref-name }}-mypy-${BRANCH}.svg
+          fi
+          
+          # Flake8 issues
+          if [[ ${{ inputs.flake8-issues }} != "disabled" ]]; then
+            QA=${{ inputs.flake8-issues  }}
+            curl -s https://img.shields.io/badge/pylint-$QA-grey > badges/${{ inputs.ref-name }}-flake8-${BRANCH}.svg
+          fi
+
+          ls badges/
+      - name: Push badge to wiki
+        shell: bash
+        continue-on-error: true # if the badge has not changed
+        run: |
+          if [[ ${{ github.ref }} != 'refs/tags/'* && ${{ github.ref_name }} != 'main' ]]; then
+            echo "not valid github reference ${{ github.ref }}"
+            exit 0
+          fi  
+          git clone https://${{ secrets.gh-user }}:${{ secrets.gh-pat }}@github.com/${{ github.repository }}.wiki.git
+          WIKI=$(find "." -type d -name "*.wiki")
+          mv badges/* $WIKI/
+          cd $WIKI/
+          git config user.name ${{ secrets.gh-user }}
+          git config user.email ${{ secrets.gh-email }}
+          git add --all
+          git commit -m "Badge from commit ${{ github.sha }} in ${{ github.ref_name }}"
+          git push

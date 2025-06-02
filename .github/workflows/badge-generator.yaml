@@ -70,6 +70,7 @@ jobs:
           
           # Coverage badge. Sonarqube only provides the latest, we want to remember what the latest tag scored.
           if [[ ${{ inputs.coverage }} != "disabled" ]]; then
+            COVERAGE=${{ inputs.coverage }}
             COLORC=$(awk -v f="$COVERAGE" 'BEGIN{print (f<30)?"red":(f>=30&&f<=70)?"yellow":"darkgreen"}')
             curl -s https://img.shields.io/badge/coverage-${COVERAGE}%25-${COLORC} > badges/${{ inputs.ref-name }}-coverage-${BRANCH}.svg
           fi

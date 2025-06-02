@@ -12,6 +12,8 @@ description: |
         ![Not found](https://github.com/BullSequana/REPLACE_WITH_YOUR_REPOSITORY/wiki/REPLACE_WITH_REF_NAME-flake8-main.svg)
         ![Not found](https://github.com/BullSequana/REPLACE_WITH_YOUR_REPOSITORY/wiki/REPLACE_WITH_REF_NAME-mypy-main.svg)
 
+permissions:
+  contents: write
 
 on:
   workflow_call:
@@ -34,17 +36,6 @@ on:
         type: string
         description: 'Mypy score returned (100 - inconsitencies_score)'
         default: disabled
-    # TODO: Get a argos-wide credentials or GH equivalent
-    secrets:
-      gh-pat:
-        description: 'Required to push badged to wiki ( use {{ secrets.GH_PAT }})'
-        required: true
-      gh-user:
-        description: 'Required to push badged to wiki ( use {{ secrets.GH_USER }})'
-        required: true
-      gh-email:
-        description: 'Required to push badged to wiki ( use {{ secrets.GH_EMAIL }})'
-        required: true
 
 
 # Cancel in-progress runs when a new workflow with the same group name is triggered
@@ -99,18 +90,20 @@ jobs:
           ls badges/
       - name: Push badge to wiki
         shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true # if the badge has not changed
         run: |
           if [[ ${{ github.ref }} != 'refs/tags/'* && ${{ github.ref_name }} != 'main' ]]; then
             echo "not valid github reference ${{ github.ref }}"
             exit 0
           fi  
-          git clone https://${{ secrets.gh-user }}:${{ secrets.gh-pat }}@github.com/${{ github.repository }}.wiki.git
+          git clone https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.wiki.git
           WIKI=$(find "." -type d -name "*.wiki")
           mv badges/* $WIKI/
           cd $WIKI/
-          git config user.name ${{ secrets.gh-user }}
-          git config user.email ${{ secrets.gh-email }}
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add --all
           git commit -m "Badge from commit ${{ github.sha }} in ${{ github.ref_name }}"
           git push

@@ -71,7 +71,7 @@ jobs:
           if [[ ${{ github.ref }} == 'refs/tags/'* ]]; then
             BRANCH=latesttag
             echo "Creating badges for tag"
-            VERSION="${{ github.ref##refs/tags/ }}"
+            VERSION="${GITHUB_REF#refs/tags/}"
             COLORV=blue
             echo "Version: $VERSION"
             curl -s https://img.shields.io/badge/version-${VERSION}-$COLORV > badges/${{ inputs.ref-name }}-version-${BRANCH}.svg

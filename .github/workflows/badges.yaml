@@ -27,6 +27,6 @@ jobs:
     uses: ./.github/workflows/badge-generator.yaml
     with:
       ref-name: pythonImage
-      coverage: "45.2"
-      flake8-issues: "2"
-      mypy-score: "95.2"
+      coverage: "67.2"
+      flake8-issues: "6"
+      mypy-score: "90.1"

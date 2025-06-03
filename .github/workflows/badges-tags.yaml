@@ -8,7 +8,9 @@ on:
   push:
     tags:
       - "*"
-
+permissions:
+  contents: write
+  
 jobs:
   run-badges:
     runs-on: [ubuntu-latest]

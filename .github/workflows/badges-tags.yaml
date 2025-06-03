@@ -1,0 +1,27 @@
+name: Tags Main Pipeline
+
+permissions:
+  packages: write
+  contents: write
+  issues: write
+  pull-requests: write
+
+run-name: ${{ github.event.commits[0].message }}
+
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  run-badges:
+    - name: Trigger Workflow B
+      uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        repository: ${{ github.repository }}
+        event-type: badges-workflow

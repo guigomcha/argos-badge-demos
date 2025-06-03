@@ -6,8 +6,6 @@ permissions:
   issues: write
   pull-requests: write
 
-run-name: ${{ github.event.commits[0].message }}
-
 concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
@@ -21,6 +19,7 @@ jobs:
   run-badges:
     runs-on: [ubuntu-latest]
     steps:
+      - uses: actions/checkout@v4
       - name: trigger bagdes
         uses: peter-evans/repository-dispatch@v3
         with:

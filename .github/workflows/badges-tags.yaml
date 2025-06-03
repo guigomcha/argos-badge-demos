@@ -13,7 +13,6 @@ jobs:
   run-badges:
     runs-on: [ubuntu-latest]
     steps:
-      - uses: actions/checkout@v4
       - name: trigger bagdes
         uses: peter-evans/repository-dispatch@v3
         with:

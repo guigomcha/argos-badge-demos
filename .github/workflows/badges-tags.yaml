@@ -19,8 +19,10 @@ on:
 
 jobs:
   run-badges:
-    uses: peter-evans/repository-dispatch@v3
-    with:
-      token: ${{ secrets.GITHUB_TOKEN }}
-      repository: ${{ github.repository }}
-      event-type: badges-workflow
+    steps:
+      - name: trigger bagdes
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          event-type: badges-workflow

@@ -19,6 +19,7 @@ on:
 
 jobs:
   run-badges:
+    runs-on: [ubuntu-latest]
     steps:
       - name: trigger bagdes
         uses: peter-evans/repository-dispatch@v3

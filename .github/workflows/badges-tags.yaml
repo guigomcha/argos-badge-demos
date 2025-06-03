@@ -19,9 +19,8 @@ on:
 
 jobs:
   run-badges:
-    - name: Trigger Workflow B
-      uses: peter-evans/repository-dispatch@v3
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        repository: ${{ github.repository }}
-        event-type: badges-workflow
+    uses: peter-evans/repository-dispatch@v3
+    with:
+      token: ${{ secrets.GITHUB_TOKEN }}
+      repository: ${{ github.repository }}
+      event-type: badges-workflow

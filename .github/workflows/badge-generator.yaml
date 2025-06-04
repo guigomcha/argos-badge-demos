@@ -52,23 +52,23 @@ jobs:
         shell: bash
         run: |
           # Badges are not created for PRs 
-          if [[ ${{ github.ref }} != 'refs/tags/'* && ${{ github.ref_name }} != 'main' ]]; then
+          if [[ ${{ github.ref_name }} != 'release/'* && ${{ github.ref_name }} != 'main' ]]; then
             echo "not valid github reference ${{ github.ref }}"
             exit 0
           fi
           mkdir badges
           BRANCH=main
           echo ${{ github.ref }}
-          if [[ ${{ github.ref }} == 'refs/tags/'* ]]; then
-            BRANCH=latesttag
+          if [[ ${{ github.ref }} == 'refs/heads/release/'* ]]; then
             echo "Creating badges for tag"
-            VERSION="${GITHUB_REF#refs/tags/}"
+            RELEASE="${GITHUB_REF_NAME#refs/heads/release/}"
+            BRANCH=$RELEASE
             COLORV=blue
-            echo "Version: $VERSION"
-            curl -s https://img.shields.io/badge/version-${VERSION}-$COLORV > badges/${{ inputs.ref-name }}-version-${BRANCH}.svg
+            echo "RELEASE: $RELEASE"
+            curl -s https://img.shields.io/badge/release-${RELEASE}-$COLORV > badges/${{ inputs.ref-name }}-release-${BRANCH}.svg
           fi
           
-          # Coverage badge. Sonarqube only provides the latest, we want to remember what the latest tag scored.
+          # Coverage badge. Sonarqube only provides the latest, we want to remember what each release branch scored.
           if [[ ${{ inputs.coverage }} != "disabled" ]]; then
             COVERAGE=${{ inputs.coverage }}
             COLORC=$(awk -v f="$COVERAGE" 'BEGIN{print (f<30)?"red":(f>=30&&f<=80)?"yellow":"darkgreen"}')
@@ -95,10 +95,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true # if the badge has not changed
         run: |
-          if [[ ${{ github.ref }} != 'refs/tags/'* && ${{ github.ref_name }} != 'main' ]]; then
+          if [[ ${{ github.ref_name }} != 'release/'* && ${{ github.ref_name }} != 'main' ]]; then
             echo "not valid github reference ${{ github.ref }}"
             exit 0
-          fi  
+          fi
           git clone https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.wiki.git
           WIKI=$(find "." -type d -name "*.wiki")
           mv badges/* $WIKI/

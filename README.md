@@ -2,10 +2,10 @@
 
 **latest tag**
 
-![Not found](https://github.com/guigomcha/argos-badge-demos/wiki/pythonImage-coverage-latesttag.svg)
-![Not found](https://github.com/guigomcha/argos-badge-demos/wiki/pythonImage-flake8-latesttag.svg)
-![Not found](https://github.com/guigomcha/argos-badge-demos/wiki/pythonImage-mypy-latesttag.svg)
-![Not found](https://github.com/guigomcha/argos-badge-demos/wiki/pythonImage-version-latesttag.svg)
+![Not found](https://github.com/guigomcha/argos-badge-demos/wiki/pythonImage-coverage-1.0.svg)
+![Not found](https://github.com/guigomcha/argos-badge-demos/wiki/pythonImage-flake8-1.0.svg)
+![Not found](https://github.com/guigomcha/argos-badge-demos/wiki/pythonImage-mypy-1.0.svg)
+![Not found](https://github.com/guigomcha/argos-badge-demos/wiki/pythonImage-release-1.0.svg)
 
 **main**
 ![Not found](https://github.com/guigomcha/argos-badge-demos/wiki/pythonImage-coverage-main.svg)

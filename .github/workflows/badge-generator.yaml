@@ -61,7 +61,7 @@ jobs:
           echo ${{ github.ref }}
           if [[ ${{ github.ref }} == 'refs/heads/release/'* ]]; then
             echo "Creating badges for tag"
-            RELEASE="${GITHUB_REF_NAME#refs/heads/release/}"
+            RELEASE="${GITHUB_REF#refs/heads/release/}"
             BRANCH=$RELEASE
             COLORV=blue
             echo "RELEASE: $RELEASE"

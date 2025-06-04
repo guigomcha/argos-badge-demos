@@ -17,6 +17,7 @@ on:
   push:
     branches:
       - main
+      - release/*
   pull_request:
   repository_dispatch:
     types: [badges-workflow]
@@ -26,6 +27,6 @@ jobs:
     uses: ./.github/workflows/badge-generator.yaml
     with:
       ref-name: pythonImage
-      coverage: "67.2"
-      flake8-issues: "6"
-      mypy-score: "90.1"
+      coverage: "90.2"
+      flake8-issues: "2"
+      mypy-score: "80.1"
